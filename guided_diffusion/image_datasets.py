@@ -3,12 +3,12 @@ import random
 
 from PIL import Image
 import blobfile as bf
-from mpi4py import MPI
+# from mpi4py import MPI
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
 
 
-def load_data(
+def load_data_old(
     *,
     data_dir,
     batch_size,
@@ -50,8 +50,8 @@ def load_data(
         image_size,
         all_files,
         classes=classes,
-        shard=MPI.COMM_WORLD.Get_rank(),
-        num_shards=MPI.COMM_WORLD.Get_size(),
+        # shard=MPI.COMM_WORLD.Get_rank(),
+        # num_shards=MPI.COMM_WORLD.Get_size(),
         random_crop=random_crop,
         random_flip=random_flip,
     )
@@ -85,15 +85,13 @@ class ImageDataset(Dataset):
         resolution,
         image_paths,
         classes=None,
-        shard=0,
-        num_shards=1,
         random_crop=False,
         random_flip=True,
     ):
         super().__init__()
         self.resolution = resolution
-        self.local_images = image_paths[shard:][::num_shards]
-        self.local_classes = None if classes is None else classes[shard:][::num_shards]
+        self.local_images = image_paths
+        self.local_classes = None if classes is None else classes
         self.random_crop = random_crop
         self.random_flip = random_flip
 
