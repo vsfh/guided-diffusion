@@ -5,7 +5,7 @@ from . import gaussian_diffusion as gd
 from .respace import SpacedDiffusion, space_timesteps
 from .unet import SuperResModel, UNetModel, EncoderUNetModel
 
-NUM_CLASSES = 1000
+NUM_CLASSES = 1
 
 
 def diffusion_defaults():
@@ -45,7 +45,7 @@ def model_and_diffusion_defaults():
     Defaults for image training.
     """
     res = dict(
-        image_size=64,
+        image_size=256,
         num_channels=128,
         num_res_blocks=2,
         num_heads=4,

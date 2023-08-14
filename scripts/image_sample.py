@@ -93,10 +93,10 @@ def main():
 def create_argparser():
     defaults = dict(
         clip_denoised=True,
-        num_samples=10000,
+        num_samples=32,
         batch_size=16,
         use_ddim=False,
-        model_path="",
+        model_path="/mnt/e/code/guided-diffusion/save/model000108130.pt",
     )
     defaults.update(model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

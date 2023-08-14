@@ -8,6 +8,19 @@ import numpy as np
 from torch.utils.data import DataLoader, Dataset
 
 
+def load_data(
+    *,
+    image_size,
+    batch_size,
+
+):
+    dataset = SmileDataset(image_size)
+    loader = DataLoader(
+        dataset, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True
+    )
+    return loader
+        
+        
 def load_data_old(
     *,
     data_dir,
@@ -78,7 +91,38 @@ def _list_image_files_recursively(data_dir):
             results.extend(_list_image_files_recursively(full_path))
     return results
 
+from torchvision import transforms
+import glob
 
+class SmileDataset(Dataset):
+    def __init__(self,image_size):
+        self.all_files = \
+                        glob.glob('/mnt/e/data/smile/YangOld/*/Img.jpg')+\
+                        glob.glob('/mnt/e/data/smile/YangNew/*/Img.jpg')   
+
+        # self.align_teeth = glob.glob('/data/shenfeihong/new_face/*')
+        self.transform = transforms.Compose(
+                            [
+                                transforms.Resize([256,256]),
+                                transforms.ToTensor()
+                            ]
+                    )
+        self.image_size = image_size
+        print('total image:', len(self.all_files))
+    
+    def __len__(self):
+        return len(self.all_files)
+    
+    def __getitem__(self, index):
+        frame_file = self.all_files[index]
+        frame = Image.open(frame_file).convert("RGB")
+        frame = frame.resize((self.image_size, self.image_size))
+        arr = np.array(frame).astype(np.float32) / 127.5 - 1
+        assert arr.shape[0]==arr.shape[1] and arr.shape[0]==self.image_size, frame_file
+        img = np.transpose(arr, [2, 0, 1])
+        
+        return img ,{}
+    
 class ImageDataset(Dataset):
     def __init__(
         self,
