@@ -12,18 +12,19 @@ from . import dist_util, logger
 from .fp16_util import MixedPrecisionTrainer
 from .nn import update_ema
 from .resample import LossAwareSampler, UniformSampler
-from tqdm import tqdm
+from tqdm.auto import tqdm
+from accelerate import Accelerator
 # For ImageNet experiments, this was a good default value.
 # We found that the lg_loss_scale quickly climbed to
 # 20-21 within the first ~1K steps of training.
 INITIAL_LOG_LOSS_SCALE = 20.0
-
+accelerator = Accelerator()
 
 class TrainLoop:
     def __init__(self, args, model, diffusion, data):
-        self.model = model
+        self.model = accelerator.prepare(model)
         self.diffusion = diffusion
-        self.data = data
+        self.data = accelerator.prepare(data)
         self.batch_size = args.batch_size
         self.microbatch = args.batch_size
         self.lr = args.lr
@@ -55,9 +56,9 @@ class TrainLoop:
         self.save_dir = args.save_dir
         # self.overwrite = args.overwrite
         
-        self.opt = AdamW(
+        self.opt = accelerator.prepare(AdamW(
             self.mp_trainer.master_params, lr=self.lr, weight_decay=self.weight_decay
-        )
+        ))
         if self.resume_step:
             self._load_optimizer_state()
             # Model was resumed, either due to a restart or a checkpoint
@@ -99,17 +100,17 @@ class TrainLoop:
 
     def run_loop(self):
         for epoch in range(self.num_epochs):
-            print(f'Starting epoch {epoch}')
+            accelerator.print(f'Starting epoch {epoch}')
             for batch, cond in tqdm(self.data):
                 if not (not self.lr_anneal_steps or self.step + self.resume_step < self.lr_anneal_steps):
                     break
                 
-                batch = batch.to(self.device)
+                # batch = batch.to(self.device)
                 self.run_step(batch, cond)
                 if self.step % self.log_interval == 0:
                     for k,v in logger.get_current().name2val.items():
                         if k == 'loss':
-                            print('step[{}]: loss[{:0.5f}]'.format(self.step+self.resume_step, v))
+                            accelerator.print('step[{}]: loss[{:0.5f}]'.format(self.step+self.resume_step, v))
 
                 if self.step % self.save_interval == 0:
                     self.save()
@@ -160,7 +161,7 @@ class TrainLoop:
             log_loss_dict(
                 self.diffusion, t, {k: v * weights for k, v in losses.items()}
             )
-            self.mp_trainer.backward(loss)
+            accelerator.backward(loss)
 
     def _anneal_lr(self):
         if not self.lr_anneal_steps:
@@ -184,15 +185,17 @@ class TrainLoop:
             logger.log(f"saving model...")
             filename = self.ckpt_file_name()
             with bf.BlobFile(bf.join(self.save_dir, filename), "wb") as f:
-                th.save(state_dict, f)
+                accelerator.wait_for_everyone()
+                accelerator.save(state_dict, f)
 
         save_checkpoint(self.mp_trainer.master_params)
 
         with bf.BlobFile(
-            bf.join(get_blob_logdir(), f"opt{(self.step+self.resume_step):06d}.pt"),
+            bf.join(self.save_dir, f"opt{(self.step+self.resume_step):06d}.pt"),
             "wb",
         ) as f:
-            th.save(self.opt.state_dict(), f)
+            accelerator.wait_for_everyone()
+            accelerator.save(self.opt.state_dict(), f)
 
 
 def parse_resume_step_from_filename(filename):
