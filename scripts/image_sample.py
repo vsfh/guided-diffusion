@@ -81,7 +81,7 @@ def create_argparser():
         num_samples=32,
         batch_size=16,
         use_ddim=False,
-        model_path="/mnt/e/code/guided-diffusion/save/model000108130.pt",
+        model_path="/mnt/e/code/guided-diffusion/save/model000300000.pt",
         save_dir = '/mnt/e/code/guided-diffusion/save'
     )
     defaults.update(model_and_diffusion_defaults())
@@ -91,9 +91,9 @@ def create_argparser():
 
 def vis_image():
     import cv2
-    imgs = np.load('/mnt/e/code/guided-diffusion/save/samples_32x256x256x3.npz')['arr_0']
+    imgs = np.load('/mnt/e/code/guided-diffusion/save/samples_32x64x64x3.npz')['arr_0']
     for img in imgs:
-        cv2.imshow('img', img)
+        cv2.imshow('img', img[...,::-1])
         cv2.waitKey(0)
     pass
 if __name__ == "__main__":

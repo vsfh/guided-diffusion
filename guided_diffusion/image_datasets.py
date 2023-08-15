@@ -97,8 +97,9 @@ import glob
 class SmileDataset(Dataset):
     def __init__(self,image_size):
         self.all_files = \
-                        glob.glob('/mnt/e/data/smile/YangOld/*/Img.jpg')+\
                         glob.glob('/mnt/e/data/smile/YangNew/*/Img.jpg')   
+            
+                        # glob.glob('/mnt/e/data/smile/YangOld/*/Img.jpg')+\
 
         # self.align_teeth = glob.glob('/data/shenfeihong/new_face/*')
         self.transform = transforms.Compose(
