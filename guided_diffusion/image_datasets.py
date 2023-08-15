@@ -97,7 +97,7 @@ import glob
 class SmileDataset(Dataset):
     def __init__(self,image_size):
         self.all_files = \
-                        glob.glob('/mnt/e/data/smile/YangNew/*/Img.jpg')   
+                        glob.glob('/ssd/gregory/smile/YangNew/*/Img.jpg')   
             
                         # glob.glob('/mnt/e/data/smile/YangOld/*/Img.jpg')+\
 
