@@ -34,6 +34,7 @@ def main():
 
     logger.log("creating data loader...")
     data = load_data(
+        data_dir=args.data_dir,
         image_size = args.image_size,
         batch_size=args.batch_size,
     )
@@ -49,7 +50,7 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        data_dir="",
+        data_dir="/data/shenfeihong/smile/Merged/Teeth/",
         schedule_sampler="uniform",
         lr=1e-4,
         weight_decay=0.0,
@@ -63,7 +64,7 @@ def create_argparser():
         use_fp16=False,
         fp16_scale_growth=1e-3,
         num_steps = 500000,
-        save_dir = '/mnt/e/code/guided-diffusion/save'
+        save_dir = '/data/shenfeihong/smile/weight/'
     )
     defaults.update(model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

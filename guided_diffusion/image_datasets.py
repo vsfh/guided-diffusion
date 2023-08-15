@@ -10,11 +10,12 @@ from torch.utils.data import DataLoader, Dataset
 
 def load_data(
     *,
+    data_dir,
     image_size,
     batch_size,
 
 ):
-    dataset = SmileDataset(image_size)
+    dataset = SmileDataset(data_dir, image_size)
     loader = DataLoader(
         dataset, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True
     )
@@ -92,12 +93,12 @@ def _list_image_files_recursively(data_dir):
     return results
 
 from torchvision import transforms
-import glob
+import os
 
 class SmileDataset(Dataset):
-    def __init__(self,image_size):
+    def __init__(self,path,image_size):
         self.all_files = \
-                        glob.glob('/mnt/e/data/smile/YangNew/*/Img.jpg')   
+                        [os.path.join(path, file, 'Img.jpg') for file in os.listdir(path)[:2000]]  
             
                         # glob.glob('/mnt/e/data/smile/YangOld/*/Img.jpg')+\
 
