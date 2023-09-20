@@ -50,7 +50,7 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        data_dir="/data/shenfeihong/smile/Merged/Teeth/",
+        data_dir="/ssd/gregory/smile/YangNew/",
         schedule_sampler="uniform",
         lr=1e-4,
         weight_decay=0.0,
@@ -64,7 +64,7 @@ def create_argparser():
         use_fp16=False,
         fp16_scale_growth=1e-3,
         num_steps = 500000,
-        save_dir = '/data/shenfeihong/smile/weight/'
+        save_dir = '/ssd/gregory/smile/weight/'
     )
     defaults.update(model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()
